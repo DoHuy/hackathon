@@ -7,15 +7,22 @@ definitions:
       username:
         example: dev
         type: string
+    required:
+    - password
+    - username
     type: object
   dto.RegisterRequest:
     properties:
       password:
         example: "123456"
+        minLength: 6
         type: string
       username:
         example: dev
         type: string
+    required:
+    - password
+    - username
     type: object
   dto.TokenResponse:
     properties:
@@ -75,6 +82,20 @@ paths:
               type: string
             type: object
       summary: Register user
+      tags:
+      - auth
+  /api/auth/revoke:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Revoke user token by time
       tags:
       - auth
   /api/upload:

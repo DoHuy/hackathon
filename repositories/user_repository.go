@@ -9,6 +9,8 @@ import (
 type UserRepository interface {
 	Create(user *models.User) error
 	FindByUsername(username string) (*models.User, error)
+	FindByID(id uint) (*models.User, error)
+	UpdateRevokeTokensBefore(user *models.User, timestamp int64) error
 }
 
 type userRepository struct {
@@ -30,4 +32,17 @@ func (r *userRepository) FindByUsername(username string) (*models.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *userRepository) FindByID(id uint) (*models.User, error) {
+	var user models.User
+	err := r.db.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) UpdateRevokeTokensBefore(user *models.User, timestamp int64) error {
+	return r.db.Model(user).Update("revoke_tokens_before", timestamp).Error
 }

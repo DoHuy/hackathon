@@ -72,6 +72,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/revoke": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Revoke user token by time",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/upload": {
             "post": {
                 "security": [
@@ -106,6 +130,10 @@ const docTemplate = `{
     "definitions": {
         "dto.LoginRequest": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string",
@@ -119,9 +147,14 @@ const docTemplate = `{
         },
         "dto.RegisterRequest": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string",
+                    "minLength": 6,
                     "example": "123456"
                 },
                 "username": {

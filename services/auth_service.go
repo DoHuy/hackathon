@@ -5,6 +5,7 @@ import (
 	"hackathon/dto"
 	"hackathon/models"
 	"hackathon/repositories"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -52,7 +53,11 @@ func (s *AuthService) Login(username, password string) (dto.TokenResponse, error
 	exp := time.Now().Add(time.Hour * time.Duration(s.expHours))
 	claims := &JwtCustomClaims{
 		user.Username,
-		jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(exp)},
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(exp),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ID:        strconv.Itoa(int(user.ID)),
+		},
 	}
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(s.jwtSecret)
 	if err != nil {
@@ -60,4 +65,12 @@ func (s *AuthService) Login(username, password string) (dto.TokenResponse, error
 	}
 
 	return dto.TokenResponse{Token: token, ExpiredTime: exp.Unix()}, nil
+}
+
+func (s *AuthService) RevokeToken(userID uint) error {
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return err
+	}
+	return s.userRepo.UpdateRevokeTokensBefore(user, time.Now().Unix())
 }

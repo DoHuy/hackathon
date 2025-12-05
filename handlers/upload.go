@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"hackathon/config"
 	"hackathon/dto"
 	"hackathon/middleware"
+	"hackathon/repositories"
 	"hackathon/services"
 	"net/http"
 
@@ -10,15 +12,18 @@ import (
 )
 
 type FileHandler struct {
-	service *services.FileService
+	service  services.FileService
+	userRepo repositories.UserRepository
+	cfg      *config.Config
 }
 
-func NewFileHandler(g *echo.Group, s *services.FileService, jwtSecret string, maxSizeMB int64) *FileHandler {
-	h := &FileHandler{service: s}
+func NewFileHandler(g *echo.Group, s services.FileService, userRepo repositories.UserRepository, cfg *config.Config) *FileHandler {
+	h := &FileHandler{service: s, userRepo: userRepo, cfg: cfg}
 	uploadGroup := g.Group("/upload")
-	uploadGroup.Use(middleware.JWTMiddleware(jwtSecret))
-	uploadGroup.Use(middleware.BodySizeLimit(maxSizeMB))
+	uploadGroup.Use(middleware.NewAuthMiddleware(userRepo, cfg.JWT.Secret))
+	uploadGroup.Use(middleware.BodySizeLimit(cfg.Storage.MaxSizeMB))
 	uploadGroup.POST("", h.Upload)
+
 	return h
 }
 
@@ -31,11 +36,11 @@ func NewFileHandler(g *echo.Group, s *services.FileService, jwtSecret string, ma
 func (h *FileHandler) Upload(c echo.Context) error {
 	file, err := c.FormFile("data")
 	if err != nil {
-		return c.String(http.StatusBadRequest, "File 'data' is required")
+		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: "File 'data' is required", StatusCode: http.StatusBadRequest})
 	}
 	metadata, err := h.service.UploadFile(file)
 	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error(), StatusCode: http.StatusBadRequest})
 	}
 	return c.JSON(http.StatusOK, dto.UploadResponse{
 		Message: "File uploaded successfully", Filename: metadata.Filename, ID: metadata.ID, ContentType: metadata.ContentType,

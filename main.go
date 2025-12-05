@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"hackathon/config"
@@ -12,11 +13,11 @@ import (
 	"hackathon/handlers"
 	"hackathon/middleware"
 	"hackathon/pkg/logger"
+	customValidator "hackathon/pkg/validator"
 	"hackathon/repositories"
 	"hackathon/services"
 
 	_ "hackathon/docs"
-
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
@@ -31,7 +32,7 @@ import (
 // @name Authorization
 func main() {
 
-	cfg, err := config.Load("env.ini")
+	cfg, err := config.Load()
 	if err != nil {
 		panic(err)
 	}
@@ -42,15 +43,17 @@ func main() {
 	database.Init(cfg.Database)
 	repos := repositories.NewRepository(database.DB)
 
-	srv := services.NewService(repos, []byte(cfg.JWT.Secret), cfg.JWT.ExpirationHours, cfg.Storage.UploadDir, cfg.Storage.MaxSizeMB)
+	allowedTypes := strings.Split(cfg.Storage.AllowedTypes, ",")
+	srv := services.NewService(repos, []byte(cfg.JWT.Secret), cfg.JWT.ExpirationHours, cfg.Storage.UploadDir, cfg.Storage.MaxSizeMB, allowedTypes)
 
 	e := echo.New()
+	e.Validator = customValidator.NewCustomValidator()
 	e.Use(middleware.RequestLogger())
 	e.Use(echoMiddleware.Recover())
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	handlers.NewHandler(e.Group("/api"), srv, cfg).RegisterRoutes()
+	handlers.NewHandler(e.Group("/api"), srv, cfg, repos).RegisterRoutes()
 
 	go func() {
 		log.Info().Str("port", cfg.Server.Port).Msg("Server started")

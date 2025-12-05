@@ -7,9 +7,9 @@ type Service struct {
 	File *FileService
 }
 
-func NewService(repos *repositories.Repository, jwtSecret []byte, expHours int, uploadDir string, maxSizeMB int64) *Service {
+func NewService(repos *repositories.Repository, jwtSecret []byte, expHours int, uploadDir string, maxSizeMB int64, allowedTypes []string) *Service {
 	return &Service{
 		Auth: NewAuthService(repos.User, jwtSecret, expHours),
-		File: NewFileService(repos.File, uploadDir, maxSizeMB),
+		File: NewFileService(repos.File, uploadDir, maxSizeMB, allowedTypes),
 	}
 }

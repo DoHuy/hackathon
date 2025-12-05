@@ -16,7 +16,7 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 COPY --from=builder /app/hackathon-app .
-COPY env.ini .
+COPY .env .
 COPY docs/ ./docs/
 RUN mkdir -p /tmp
 EXPOSE 8080

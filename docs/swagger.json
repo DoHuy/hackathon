@@ -64,6 +64,30 @@
                 }
             }
         },
+        "/api/auth/revoke": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Revoke user token by time",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/upload": {
             "post": {
                 "security": [
@@ -98,6 +122,10 @@
     "definitions": {
         "dto.LoginRequest": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string",
@@ -111,9 +139,14 @@
         },
         "dto.RegisterRequest": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string",
+                    "minLength": 6,
                     "example": "123456"
                 },
                 "username": {

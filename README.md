@@ -63,12 +63,12 @@ hackathon/
     go mod tidy
     ```
 
-4.  **Cấu hình file `env.ini`**
+4.  **Cấu hình file `env`**
 
-    Sao chép file `env.example.ini` thành `env.ini` và cập nhật các thông tin cho môi trường local của bạn.
+    Sao chép file `env.example` thành `.env` và cập nhật các thông tin cho môi trường local của bạn.
 
     ```bash
-    cp env.example.ini env.ini
+    cp env.example .env
     ```
 
     Đối với môi trường local, bạn có thể cần cập nhật phần `[database]` để sử dụng PostgreSQL trên máy của bạn.
@@ -109,4 +109,14 @@ hackathon/
 
     ```bash
     docker-compose down
+    ```
+
+## 🧪 Chạy Unit Test
+
+Để chạy tất cả các unit test của dự án, sử dụng lệnh sau:
+
+```bash
+go test ./...
+```
+
     ```

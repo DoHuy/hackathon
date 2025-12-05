@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: hackathon_api
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    volumes:
+      - ./uploads_data:/tmp
+    networks:
+      - hackathon_net
+
+  db:
+    image: postgres:15-alpine
+    container_name: hackathon_db
+    restart: always
+    environment:
+      - POSTGRES_USER=hackathon_user
+      - POSTGRES_PASSWORD=hackathon_secret
+      - POSTGRES_DB=hackathon_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hackathon_net
+
+volumes:
+  postgres_data:
+
+networks:
+  hackathon_net:
+    driver: bridge

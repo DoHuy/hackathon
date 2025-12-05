@@ -1,0 +1,103 @@
+definitions:
+  dto.LoginRequest:
+    properties:
+      password:
+        example: "123456"
+        type: string
+      username:
+        example: dev
+        type: string
+    type: object
+  dto.RegisterRequest:
+    properties:
+      password:
+        example: "123456"
+        type: string
+      username:
+        example: dev
+        type: string
+    type: object
+  dto.TokenResponse:
+    properties:
+      expired_time:
+        type: integer
+      token:
+        type: string
+    type: object
+  dto.UploadResponse:
+    properties:
+      content_type:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: API Server with JWT Auth, Postgres
+  title: Hackathon API
+  version: "1.0"
+paths:
+  /api/auth/login:
+    post:
+      parameters:
+      - description: Info
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TokenResponse'
+      summary: Login
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      parameters:
+      - description: Info
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register user
+      tags:
+      - auth
+  /api/upload:
+    post:
+      parameters:
+      - description: Image
+        in: formData
+        name: data
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UploadResponse'
+      security:
+      - BearerAuth: []
+      summary: Upload file
+      tags:
+      - file
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
